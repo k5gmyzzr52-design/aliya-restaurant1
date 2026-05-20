@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   if (code !== MASTER) {
     return NextResponse.json({ ok: false, error: 'Nieprawidłowy kod' }, { status: 401 });
   }
-  const devices = readJSON<Device[]>('devices.json', []);
+  const devices = readJson<Device[]>('devices.json', []);
   const id = crypto.randomBytes(24).toString('hex');
   devices.push({ id, name: name || 'Urządzenie', createdAt: new Date().toISOString() });
   writeJSON('devices.json', devices);
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const token = req.headers.get('x-device-token');
   if (!token) return NextResponse.json({ ok: false }, { status: 401 });
-  const devices = readJSON<Device[]>('devices.json', []);
+  const devices = readJson<Device[]>('devices.json', []);
   const found = devices.find(d => d.id === token);
   if (!found) return NextResponse.json({ ok: false }, { status: 401 });
   return NextResponse.json({ ok: true, device: { name: found.name, createdAt: found.createdAt } });
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const token = req.headers.get('x-device-token');
   if (!token) return NextResponse.json({ ok: false }, { status: 401 });
-  const devices = readJSON<Device[]>('devices.json', []);
+  const devices = readJson<Device[]>('devices.json', []);
   writeJSON('devices.json', devices.filter(d => d.id !== token));
   return NextResponse.json({ ok: true });
 }
