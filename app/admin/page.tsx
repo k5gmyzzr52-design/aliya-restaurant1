@@ -14,12 +14,12 @@ const STATUS_COLORS: Record<string,string> = {
 };
 
 const RES_STATUS_LABELS: Record<string,string> = {
-  pending: 'Oczekuje', confirmed: 'Potwierdzona', completed: 'Zakończona', cancelled: 'Anulowana'
+  new: 'Oczekuje', confirmed: 'Potwierdzona', done: 'Zakończona', cancelled: 'Anulowana'
 };
 const RES_STATUS_COLORS: Record<string,string> = {
-  pending: 'from-amber-400 to-orange-500',
+  new: 'from-amber-400 to-orange-500',
   confirmed: 'from-blue-400 to-cyan-500',
-  completed: 'from-emerald-400 to-green-500',
+  done: 'from-emerald-400 to-green-500',
   cancelled: 'from-zinc-500 to-zinc-700'
 };
 
@@ -32,7 +32,7 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [reservations, setReservations] = useState<any[]>([]);
   const [filter, setFilter] = useState<string>('new');
-  const [resFilter, setResFilter] = useState<string>('pending');
+  const [resFilter, setResFilter] = useState<string>('new');
   const [tab, setTab] = useState<'orders' | 'reservations'>('orders');
 
   // Inject fonts
@@ -193,9 +193,9 @@ export default function AdminPage() {
             <button onClick={() => setTab('reservations')}
               className={`px-5 py-2 rounded-full text-sm tracking-wider transition-all flex items-center gap-2 ${tab === 'reservations' ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-black font-semibold' : 'text-zinc-300 hover:text-amber-400'}`}>
               <Calendar className="w-4 h-4" /> Rezerwacje
-              {reservations.filter(r => r.status === 'pending').length > 0 && (
+              {reservations.filter(r => r.status === 'new').length > 0 && (
                 <span className={`text-xs px-1.5 py-0.5 rounded-full ${tab === 'reservations' ? 'bg-black/20' : 'bg-amber-400/20 text-amber-400'}`}>
-                  {reservations.filter(r => r.status === 'pending').length}
+                  {reservations.filter(r => r.status === 'new').length}
                 </span>
               )}
             </button>
@@ -323,7 +323,7 @@ export default function AdminPage() {
               <h2 className="font-serif-lux text-5xl font-light mb-8">Lista <span className="italic gradient-gold">rezerwacji</span></h2>
 
               <div className="flex flex-wrap gap-3">
-                {['all','pending','confirmed','completed','cancelled'].map(s => {
+                {['all','new','confirmed','done','cancelled'].map(s => {
                   const count = s === 'all' ? reservations.length : reservations.filter(r => r.status === s).length;
                   const active = resFilter === s;
                   return (
@@ -356,8 +356,8 @@ export default function AdminPage() {
                         </div>
                         <div className="text-xs text-zinc-500 mt-1">Złożona: {new Date(r.createdAt).toLocaleString('pl-PL')}</div>
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-xs bg-gradient-to-r ${RES_STATUS_COLORS[r.status]} text-black font-semibold`}>
-                        {RES_STATUS_LABELS[r.status]}
+                      <div className={`px-3 py-1 rounded-full text-xs bg-gradient-to-r ${RES_STATUS_COLORS[r.status] || 'from-zinc-500 to-zinc-700'} text-black font-semibold`}>
+                        {RES_STATUS_LABELS[r.status] || r.status}
                       </div>
                     </div>
 
@@ -369,7 +369,10 @@ export default function AdminPage() {
                           {new Date(r.date).toLocaleDateString('pl-PL', { day: '2-digit', month: 'long' })}
                         </div>
                         <div className="text-zinc-300 text-sm mt-1">
-                          {r.time} • <span className="inline-flex items-center gap-1"><Users className="w-3 h-3" /> {r.guests} {r.guests === 1 ? 'osoba' : r.guests < 5 ? 'osoby' : 'osób'}</span>
+                          {r.time} • <span className="inline-flex items-center gap-1">
+  <Users className="w-3 h-3" />
+  {r.people} {r.people === 1 ? 'osoba' : r.people < 5 ? 'osoby' : 'osób'}
+</span>
                         </div>
                       </div>
                     </div>
@@ -380,23 +383,27 @@ export default function AdminPage() {
                         <Phone className="w-3 h-3" /> {r.customer.phone}
                       </a>
                       {r.customer.email && <div className="text-zinc-400 text-sm mt-1 truncate">{r.customer.email}</div>}
-                      {r.customer.notes && <div className="text-zinc-400 text-sm mt-2 italic">„{r.customer.notes}"</div>}
+                      {r.notes && (
+  <div className="text-zinc-400 text-sm mt-2 italic">
+    „{r.notes}"
+  </div>
+)}
                     </div>
 
                     <div className="flex gap-2 pt-2 border-t border-white/10">
-                      {r.status === 'pending' && (
+                      {r.status === 'new' && (
                         <button onClick={() => setResStatus(r.id, 'confirmed')}
                           className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-blue-400 to-cyan-500 text-black text-xs font-semibold tracking-wider flex items-center justify-center gap-1">
                           <CheckCircle className="w-3 h-3" /> POTWIERDŹ
                         </button>
                       )}
                       {r.status === 'confirmed' && (
-                        <button onClick={() => setResStatus(r.id, 'completed')}
+                        <button onClick={() => setResStatus(r.id, 'done')}
                           className="flex-1 py-2.5 rounded-full bg-gradient-to-r from-emerald-400 to-green-500 text-black text-xs font-semibold tracking-wider flex items-center justify-center gap-1">
                           <CheckCircle className="w-3 h-3" /> ZAKOŃCZ
                         </button>
                       )}
-                      {(r.status === 'pending' || r.status === 'confirmed') && (
+                      {(r.status === 'new' || r.status === 'confirmed') && (
                         <button onClick={() => setResStatus(r.id, 'cancelled')}
                           className="px-4 py-2.5 rounded-full glass text-zinc-400 hover:text-red-400 text-xs">
                           <X className="w-3 h-3" />

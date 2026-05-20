@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readJSON, writeJSON, Order } from '@/lib/db';
+import { readJson, writeJson, Order } from '@/lib/db';
 import crypto from 'crypto';
 
 const MIN_ORDER = 60;
@@ -12,7 +12,7 @@ interface Device { id: string; name: string; createdAt: string; }
 function isAdmin(req: NextRequest): boolean {
   const token = req.headers.get('x-device-token');
   if (!token) return false;
-  const devices = readJSON<Device[]>('devices.json', []);
+  const devices = readJson<Device[]>('devices.json', []);
   return devices.some(d => d.id === token);
 }
 
@@ -60,9 +60,9 @@ export async function POST(req: NextRequest) {
       items, subtotal, delivery, total, customer,
     };
 
-    const orders = readJSON<Order[]>('orders.json', []);
+    const orders = readJson<Order[]>('orders.json', []);
     orders.unshift(order);
-    writeJSON('orders.json', orders);
+    writeJson('orders.json', orders);
 
     return NextResponse.json({ ok: true, id, total });
   } catch (e: any) {
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!isAdmin(req))
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
-  const orders = readJSON<Order[]>('orders.json', []);
+  const orders = readJson<Order[]>('orders.json', []);
   return NextResponse.json(orders);
 }
 
@@ -87,13 +87,13 @@ export async function PATCH(req: NextRequest) {
   if (status && !validStatuses.includes(status))
     return NextResponse.json({ ok: false, error: 'Nieprawidłowy status' }, { status: 400 });
 
-  const orders = readJSON<Order[]>('orders.json', []);
+  const orders = readJson<Order[]>('orders.json', []);
   const idx = orders.findIndex(o => o.id === id);
   if (idx === -1)
     return NextResponse.json({ ok: false, error: 'Nie znaleziono' }, { status: 404 });
 
   if (status) orders[idx].status = status;
   if (paymentStatus) orders[idx].paymentStatus = paymentStatus;
-  writeJSON('orders.json', orders);
+  writeJson('orders.json', orders);
   return NextResponse.json({ ok: true, order: orders[idx] });
 }

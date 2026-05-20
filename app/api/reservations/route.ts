@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readJSON, writeJSON, Reservation } from '@/lib/db';
+import { readJson, writeJson, Reservation } from '@/lib/db';
 import crypto from 'crypto';
 
 const MAX_GUESTS = 20;
@@ -8,11 +8,11 @@ const CLOSE_HOUR = 22;
 
 interface Device { id: string; name: string; createdAt: string; }
 
-function isAdmin(req: NextRequest): boolean {
+async function isAdmin(req: NextRequest): Promise<boolean> {
   const token = req.headers.get('x-device-token');
   if (!token) return false;
-  const devices = readJSON<Device[]>('devices.json', []);
-  return devices.some(d => d.id === token);
+  const devices = await readJson<Device[]>('devices.json', []);
+return devices.some(d => d.id === token);
 }
 
 export async function POST(req: NextRequest) {
@@ -64,9 +64,9 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const reservations = readJSON<Reservation[]>('reservations.json', []);
+    const reservations = await readJson<Reservation[]>('reservations.json', []);
     reservations.unshift(reservation);
-    writeJSON('reservations.json', reservations);
+    await writeJson('reservations.json', reservations);
 
     return NextResponse.json({ ok: true, id });
   } catch (e: any) {
@@ -76,27 +76,27 @@ export async function POST(req: NextRequest) {
 
 // ⚠️ TABLICA BEZPOŚREDNIO — admin robi setReservations(await r.json())
 export async function GET(req: NextRequest) {
-  if (!isAdmin(req))
+  if (!(await isAdmin(req)))
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
-  const reservations = readJSON<Reservation[]>('reservations.json', []);
+  const reservations = await readJson<Reservation[]>('reservations.json', []);
   return NextResponse.json(reservations);
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!isAdmin(req))
+  if (!(await isAdmin(req)))
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
 
-  const { id, status } = await req.json();
-  const validStatuses = ['pending','confirmed','completed','cancelled'];
+  const { id, status } = await req.Json();
+const validStatuses = ['new', 'confirmed', 'done', 'cancelled'];
   if (status && !validStatuses.includes(status))
     return NextResponse.json({ ok: false, error: 'Nieprawidłowy status' }, { status: 400 });
 
-  const reservations = readJSON<Reservation[]>('reservations.json', []);
+  const reservations = await readJson<Reservation[]>('reservations.json', []);
   const idx = reservations.findIndex(r => r.id === id);
   if (idx === -1)
     return NextResponse.json({ ok: false, error: 'Nie znaleziono' }, { status: 404 });
 
   if (status) reservations[idx].status = status;
-  writeJSON('reservations.json', reservations);
+  await writeJson('reservations.json', reservations);
   return NextResponse.json({ ok: true, reservation: reservations[idx] });
 }

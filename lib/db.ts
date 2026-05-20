@@ -37,15 +37,6 @@ export type Order = {
     postal: string; city: string; notes?: string;
   };
 };
-
-export type Reservation = {
-  id: string;
-  createdAt: string;
-  status: 'new' | 'confirmed' | 'cancelled';
-  name: string; phone: string; email?: string;
-  date: string; time: string; people: number;
-  message?: string;
-};
 export type Reservation = {
   id: string;
   createdAt: string;

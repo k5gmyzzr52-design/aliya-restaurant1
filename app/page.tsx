@@ -1093,7 +1093,225 @@ export default function AliyaRestaurant() {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> <ReservationWidget />
     </div>
+  );
+}
+/* ============================================================
+   REZERWACJA STOLIKA — samodzielny widget
+   ============================================================ */
+function ReservationWidget() {
+  const [open, setOpen] = React.useState(false);
+  const [sent, setSent] = React.useState<string | null>(null);
+  const [processing, setProcessing] = React.useState(false);
+  const [err, setErr] = React.useState<string | null>(null);
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const [f, setF] = React.useState({
+    name: '', phone: '', email: '',
+    date: today, time: '19:00',
+    guests: 2, notes: '',
+    consent: false,
+  });
+
+  const send = async () => {
+    setErr(null);
+    if (!f.name || !f.phone || !f.date || !f.time) { setErr('Uzupełnij wymagane pola'); return; }
+    if (!/^\+?\d[\d\s-]{7,}$/.test(f.phone)) { setErr('Nieprawidłowy telefon'); return; }
+    if (!f.consent) { setErr('Zaakceptuj regulamin'); return; }
+
+    setProcessing(true);
+    try {
+      const r = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer: { name: f.name, phone: f.phone, email: f.email || undefined, notes: f.notes || undefined },
+          date: f.date, time: f.time, guests: Number(f.guests),
+        }),
+      });
+      const data = await r.json();
+      if (!data.ok) { setErr(data.error || 'Błąd rezerwacji'); return; }
+      setSent(data.id);
+      setOpen(false);
+      setF({ ...f, notes: '', consent: false });
+    } catch (e: any) {
+      setErr(e.message || 'Błąd sieci');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // godziny 12:00–22:00 co 30 min
+  const slots: string[] = [];
+  for (let h = 12; h <= 22; h++) {
+    slots.push(`${String(h).padStart(2,'0')}:00`);
+    if (h < 22) slots.push(`${String(h).padStart(2,'0')}:30`);
+  }
+
+  return (
+    <>
+      {/* FAB — przycisk pływający lewy dolny róg */}
+      <motion.button
+        initial={{ scale: 0, y: 100 }}
+        animate={{ scale: 1, y: 0 }}
+        transition={{ delay: 0.5, type: 'spring' }}
+        onClick={() => setOpen(true)}
+        className="fixed bottom-8 left-8 z-50 px-6 h-14 rounded-full glass border border-amber-400/40 text-amber-400 flex items-center gap-2 font-semibold tracking-wider text-sm hover:bg-amber-400/10 transition"
+        style={{ boxShadow: '0 0 30px rgba(251,191,36,0.2)' }}
+      >
+        <Utensils className="w-4 h-4" />
+        REZERWACJA
+      </motion.button>
+
+      {/* MODAL */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => !processing && setOpen(false)}
+            className="fixed inset-0 z-[80] bg-black/85 backdrop-blur-xl flex items-start md:items-center justify-center p-4 md:p-6 overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 30 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass rounded-3xl p-6 md:p-10 max-w-xl w-full my-auto"
+              style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)', border: '1px solid rgba(251,191,36,0.2)' }}
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <div className="text-xs tracking-[0.3em] mb-2" style={{ color: '#fbbf24' }}>REZERWACJA STOLIKA</div>
+                  <h3 className="font-serif-lux text-3xl md:text-4xl">Zarezerwuj wizytę</h3>
+                  <p className="text-zinc-400 text-sm mt-2">Mickiewicza 3, Turek · 12:00–22:00</p>
+                </div>
+                <button onClick={() => !processing && setOpen(false)} className="w-10 h-10 rounded-full glass flex items-center justify-center shrink-0">
+                  <X className="w-5 h-5 text-amber-400" />
+                </button>
+              </div>
+
+              {/* DANE */}
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="text-xs text-zinc-500 tracking-wider mb-2 block">IMIĘ I NAZWISKO *</label>
+                  <input value={f.name} onChange={e => setF({...f, name: e.target.value})} className="w-full bg-transparent border-b border-white/20 py-2.5 outline-none focus:border-amber-400" />
+                </div>
+                <div>
+                  <label className="text-xs text-zinc-500 tracking-wider mb-2 block">TELEFON *</label>
+                  <input value={f.phone} onChange={e => setF({...f, phone: e.target.value})} placeholder="+48 ..." className="w-full bg-transparent border-b border-white/20 py-2.5 outline-none focus:border-amber-400" />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="text-xs text-zinc-500 tracking-wider mb-2 block">EMAIL (opcjonalnie)</label>
+                <input type="email" value={f.email} onChange={e => setF({...f, email: e.target.value})} className="w-full bg-transparent border-b border-white/20 py-2.5 outline-none focus:border-amber-400" />
+              </div>
+
+              {/* DATA / GODZINA / OSOBY */}
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="text-xs text-zinc-500 tracking-wider mb-2 block">DATA *</label>
+                  <input
+                    type="date"
+                    min={today}
+                    value={f.date}
+                    onChange={e => setF({...f, date: e.target.value})}
+                    className="w-full bg-transparent border-b border-white/20 py-2.5 outline-none focus:border-amber-400 text-white [color-scheme:dark]"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-zinc-500 tracking-wider mb-2 block">GODZINA *</label>
+                  <select
+                    value={f.time}
+                    onChange={e => setF({...f, time: e.target.value})}
+                    className="w-full bg-transparent border-b border-white/20 py-2.5 outline-none focus:border-amber-400 text-white"
+                    style={{ colorScheme: 'dark' }}
+                  >
+                    {slots.map(s => <option key={s} value={s} className="bg-zinc-900">{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-zinc-500 tracking-wider mb-2 block">OSÓB *</label>
+                  <select
+                    value={f.guests}
+                    onChange={e => setF({...f, guests: Number(e.target.value)})}
+                    className="w-full bg-transparent border-b border-white/20 py-2.5 outline-none focus:border-amber-400 text-white"
+                    style={{ colorScheme: 'dark' }}
+                  >
+                    {[1,2,3,4,5,6,7,8,9,10,12,15,20].map(n => <option key={n} value={n} className="bg-zinc-900">{n}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="text-xs text-zinc-500 tracking-wider mb-2 block">UWAGI (alergie, okazja, preferencje)</label>
+                <textarea value={f.notes} onChange={e => setF({...f, notes: e.target.value})} rows={2} className="w-full bg-transparent border-b border-white/20 py-2.5 outline-none focus:border-amber-400 resize-none" />
+              </div>
+
+              {/* PODSUMOWANIE */}
+              <div className="bg-amber-400/5 border border-amber-400/20 rounded-2xl p-4 mb-5 flex items-center gap-4 text-sm">
+                <Clock className="w-5 h-5 text-amber-400 shrink-0" />
+                <div className="flex-1">
+                  <div className="text-zinc-300">
+                    {new Date(f.date).toLocaleDateString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' })} · <b className="text-amber-400">{f.time}</b>
+                  </div>
+                  <div className="text-zinc-500 text-xs">{f.guests} {f.guests === 1 ? 'osoba' : f.guests < 5 ? 'osoby' : 'osób'}</div>
+                </div>
+              </div>
+
+              {/* ZGODA */}
+              <label className="flex items-start gap-2 cursor-pointer text-xs text-zinc-400 mb-4">
+                <input type="checkbox" checked={f.consent} onChange={e => setF({...f, consent: e.target.checked})} className="mt-0.5 accent-amber-400" />
+                <span>Akceptuję regulamin i wyrażam zgodę na kontakt telefoniczny w celu potwierdzenia rezerwacji. *</span>
+              </label>
+
+              {err && (
+                <div className="mb-4 text-xs text-red-400 bg-red-400/10 border border-red-400/30 rounded-xl p-3 text-center">
+                  {err}
+                </div>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                disabled={processing || !f.name || !f.phone || !f.consent}
+                onClick={send}
+                className="w-full py-4 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-black font-semibold tracking-wider glow-gold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {processing ? (
+                  <>
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="w-5 h-5 border-2 border-black border-t-transparent rounded-full" />
+                    WYSYŁANIE...
+                  </>
+                ) : (
+                  <>REZERWUJ STOLIK <ArrowUpRight className="w-5 h-5" /></>
+                )}
+              </motion.button>
+
+              <div className="mt-4 text-center text-xs text-zinc-500">
+                Potwierdzimy rezerwację telefonicznie w ciągu 30 minut.
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* SUCCESS */}
+      <AnimatePresence>
+        {sent && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[90] bg-black/95 flex items-center justify-center p-6" onClick={() => setSent(null)}>
+            <div className="text-center max-w-md">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mx-auto mb-6 glow-gold">
+                <CheckCircle2 className="w-12 h-12 text-black" />
+              </motion.div>
+              <h3 className="font-serif-lux text-5xl mb-4">Rezerwacja przyjęta!</h3>
+              <p className="text-zinc-400 mb-1">Skontaktujemy się z Tobą telefonicznie</p>
+              <p className="text-zinc-400 mb-4">w ciągu <b className="text-amber-400">30 minut</b> w celu potwierdzenia.</p>
+              <p className="text-amber-400 text-sm tracking-widest font-mono">NR: {sent}</p>
+              <button onClick={() => setSent(null)} className="mt-8 px-6 py-2.5 rounded-full glass-gold text-amber-400 text-sm tracking-wider hover:bg-amber-400/20 transition">ZAMKNIJ</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
