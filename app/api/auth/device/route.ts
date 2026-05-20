@@ -34,6 +34,6 @@ export async function DELETE(req: NextRequest) {
   const token = req.headers.get('x-device-token');
   if (!token) return NextResponse.json({ ok: false }, { status: 401 });
   const devices = await readJson<Device[]>('devices.json', []);
-  writeJSON('devices.json', devices.filter(d => d.id !== token));
+  await writeJson('devices.json', devices.filter(d => d.id !== token));
   return NextResponse.json({ ok: true });
 }

@@ -52,15 +52,16 @@ export async function POST(req: NextRequest) {
     const reservation: Reservation = {
       id,
       createdAt: new Date().toISOString(),
-      status: 'pending',
+      status: 'new',
       date,
       time,
-      guests: guestsNum,
+      people: guestsNum,
+notes: customer.notes ? String(customer.notes).slice(0, 500) : '',
+      
       customer: {
         name: String(customer.name).slice(0, 100),
         phone: String(customer.phone).slice(0, 30),
         email: customer.email ? String(customer.email).slice(0, 120) : undefined,
-        notes: customer.notes ? String(customer.notes).slice(0, 500) : undefined,
       },
     };
 
@@ -86,7 +87,7 @@ export async function PATCH(req: NextRequest) {
   if (!(await isAdmin(req)))
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
 
-  const { id, status } = await req.Json();
+  const { id, status } = await req.json();
 const validStatuses = ['new', 'confirmed', 'done', 'cancelled'];
   if (status && !validStatuses.includes(status))
     return NextResponse.json({ ok: false, error: 'Nieprawidłowy status' }, { status: 400 });

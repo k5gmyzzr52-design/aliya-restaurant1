@@ -9,10 +9,13 @@ const FREE_DELIVERY_FROM = 200;
 interface Device { id: string; name: string; createdAt: string; }
 
 // Ten sam mechanizm co w /api/auth/device
-function isAdmin(req: NextRequest): boolean {
+async function isAdmin(req: NextRequest): Promise<boolean> {
   const token = req.headers.get('x-device-token');
+
   if (!token) return false;
-  const devices = readJson<Device[]>('devices.json', []);
+
+  const devices = await readJson<Device[]>('devices.json', []);
+
   return devices.some(d => d.id === token);
 }
 
@@ -60,7 +63,7 @@ export async function POST(req: NextRequest) {
       items, subtotal, delivery, total, customer,
     };
 
-    const orders = readJson<Order[]>('orders.json', []);
+    const orders = await readJson<Order[]>('orders.json', []);
     orders.unshift(order);
     writeJson('orders.json', orders);
 
@@ -72,14 +75,14 @@ export async function POST(req: NextRequest) {
 
 // ⚠️ TABLICA BEZPOŚREDNIO — admin robi setOrders(await r.json())
 export async function GET(req: NextRequest) {
-  if (!isAdmin(req))
+  if (!(await isAdmin(req)))
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   const orders = readJson<Order[]>('orders.json', []);
   return NextResponse.json(orders);
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!isAdmin(req))
+  if (!(await isAdmin(req)))
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
 
   const { id, status, paymentStatus } = await req.json();
@@ -87,7 +90,7 @@ export async function PATCH(req: NextRequest) {
   if (status && !validStatuses.includes(status))
     return NextResponse.json({ ok: false, error: 'Nieprawidłowy status' }, { status: 400 });
 
-  const orders = readJson<Order[]>('orders.json', []);
+  const orders = await readJson<Order[]>('orders.json', []);
   const idx = orders.findIndex(o => o.id === id);
   if (idx === -1)
     return NextResponse.json({ ok: false, error: 'Nie znaleziono' }, { status: 404 });
