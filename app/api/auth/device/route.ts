@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readJSON, writeJSON } from '@/lib/db';
+import { readJson, writeJSON } from '@/lib/db';
 import crypto from 'crypto';
 
 const MASTER = process.env.MASTER_PAIR_CODE || 'aliya2025';

@@ -395,7 +395,7 @@ export default function AliyaRestaurant() {
 
           <h1 className="font-serif-lux text-7xl md:text-9xl font-light leading-none tracking-tight">
             <motion.span initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 1.2 }} className="block text-glow">Smak.</motion.span>
-            <motion.span initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 1.2 }} className="block gradient-gold italic">Kutas.</motion.span>
+            <motion.span initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 1.2 }} className="block gradient-gold italic">Sztuki.</motion.span>
             <motion.span initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, duration: 1.2 }} className="block">Aliya.</motion.span>
           </h1>
 

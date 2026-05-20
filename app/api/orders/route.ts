@@ -1,64 +1,99 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readJSON, writeJSON } from '@/lib/db';
+import { readJSON, writeJSON, Order } from '@/lib/db';
 import crypto from 'crypto';
 
-interface Order {
-  id: string;
-  items: { id: number; name: string; price: number; qty: number }[];
-  total: number;
-  customer: { name: string; phone: string; table?: string; notes?: string };
-  status: 'new' | 'in_progress' | 'done' | 'cancelled';
-  createdAt: string;
-}
+const MIN_ORDER = 60;
+const DELIVERY_FEE = 12;
+const FREE_DELIVERY_FROM = 200;
 
-function isAuthorized(req: NextRequest) {
+interface Device { id: string; name: string; createdAt: string; }
+
+// Ten sam mechanizm co w /api/auth/device
+function isAdmin(req: NextRequest): boolean {
   const token = req.headers.get('x-device-token');
   if (!token) return false;
-  const devices = readJSON<{id:string}[]>('devices.json', []);
+  const devices = readJSON<Device[]>('devices.json', []);
   return devices.some(d => d.id === token);
 }
 
-// POST – klient składa zamówienie (publiczne)
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const orders = readJSON<Order[]>('orders.json', []);
-  const order: Order = {
-    id: crypto.randomBytes(6).toString('hex'),
-    items: body.items || [],
-    total: body.total || 0,
-    customer: body.customer || { name: '', phone: '' },
-    status: 'new',
-    createdAt: new Date().toISOString(),
-  };
-  orders.unshift(order);
-  writeJSON('orders.json', orders);
-  return NextResponse.json({ ok: true, id: order.id });
+  try {
+    const body = await req.json();
+    const { items, customer, paymentMethod, blikCode } = body;
+
+    if (!Array.isArray(items) || items.length === 0)
+      return NextResponse.json({ ok: false, error: 'Pusty koszyk' }, { status: 400 });
+
+    if (!customer?.name || !customer?.phone || !customer?.street ||
+        !customer?.building || !customer?.postal || !customer?.city)
+      return NextResponse.json({ ok: false, error: 'Brak wymaganych danych' }, { status: 400 });
+
+    if (!/^\+?\d[\d\s-]{7,}$/.test(customer.phone))
+      return NextResponse.json({ ok: false, error: 'Nieprawidłowy telefon' }, { status: 400 });
+
+    if (!/^\d{2}-\d{3}$/.test(customer.postal))
+      return NextResponse.json({ ok: false, error: 'Nieprawidłowy kod pocztowy' }, { status: 400 });
+
+    const validMethods = ['blik','card','transfer','cash','card_courier'];
+    if (!validMethods.includes(paymentMethod))
+      return NextResponse.json({ ok: false, error: 'Nieprawidłowa metoda płatności' }, { status: 400 });
+
+    if (paymentMethod === 'blik' && !/^\d{6}$/.test(blikCode || ''))
+      return NextResponse.json({ ok: false, error: 'Kod BLIK musi mieć 6 cyfr' }, { status: 400 });
+
+    const subtotal = items.reduce((s: number, i: any) => s + Number(i.price) * Number(i.qty), 0);
+    if (subtotal < MIN_ORDER)
+      return NextResponse.json({ ok: false, error: `Min. zamówienie ${MIN_ORDER} zł` }, { status: 400 });
+
+    const delivery = subtotal >= FREE_DELIVERY_FROM ? 0 : DELIVERY_FEE;
+    const total = subtotal + delivery;
+
+    const id = 'ALIYA-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+
+    const order: Order = {
+      id,
+      createdAt: new Date().toISOString(),
+      status: 'new',
+      paymentStatus: paymentMethod === 'cash' || paymentMethod === 'card_courier' ? 'cod' : 'pending',
+      paymentMethod,
+      blikCode: paymentMethod === 'blik' ? blikCode : undefined,
+      items, subtotal, delivery, total, customer,
+    };
+
+    const orders = readJSON<Order[]>('orders.json', []);
+    orders.unshift(order);
+    writeJSON('orders.json', orders);
+
+    return NextResponse.json({ ok: true, id, total });
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e.message }, { status: 500 });
+  }
 }
 
-// GET – tylko admin
+// ⚠️ TABLICA BEZPOŚREDNIO — admin robi setOrders(await r.json())
 export async function GET(req: NextRequest) {
-  if (!isAuthorized(req)) return NextResponse.json({ ok: false }, { status: 401 });
-  return NextResponse.json(readJSON<Order[]>('orders.json', []));
-}
-
-// PATCH – zmiana statusu (admin)
-export async function PATCH(req: NextRequest) {
-  if (!isAuthorized(req)) return NextResponse.json({ ok: false }, { status: 401 });
-  const { id, status } = await req.json();
+  if (!isAdmin(req))
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   const orders = readJSON<Order[]>('orders.json', []);
-  const o = orders.find(x => x.id === id);
-  if (!o) return NextResponse.json({ ok: false }, { status: 404 });
-  o.status = status;
-  writeJSON('orders.json', orders);
-  return NextResponse.json({ ok: true });
+  return NextResponse.json(orders);
 }
 
-// DELETE – usuń zamówienie
-export async function DELETE(req: NextRequest) {
-  if (!isAuthorized(req)) return NextResponse.json({ ok: false }, { status: 401 });
-  const { id } = await req.json();
-  let orders = readJSON<Order[]>('orders.json', []);
-  orders = orders.filter(x => x.id !== id);
+export async function PATCH(req: NextRequest) {
+  if (!isAdmin(req))
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+
+  const { id, status, paymentStatus } = await req.json();
+  const validStatuses = ['new','in_progress','done','cancelled'];
+  if (status && !validStatuses.includes(status))
+    return NextResponse.json({ ok: false, error: 'Nieprawidłowy status' }, { status: 400 });
+
+  const orders = readJSON<Order[]>('orders.json', []);
+  const idx = orders.findIndex(o => o.id === id);
+  if (idx === -1)
+    return NextResponse.json({ ok: false, error: 'Nie znaleziono' }, { status: 404 });
+
+  if (status) orders[idx].status = status;
+  if (paymentStatus) orders[idx].paymentStatus = paymentStatus;
   writeJSON('orders.json', orders);
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, order: orders[idx] });
 }

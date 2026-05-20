@@ -1,18 +1,62 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
-export function readJSON<T>(file: string, fallback: T): T {
-  const p = path.join(DATA_DIR, file);
+async function ensureDir() {
+  try { await fs.mkdir(DATA_DIR, { recursive: true }); } catch {}
+}
+
+export async function readJson<T>(file: string, fallback: T): Promise<T> {
+  await ensureDir();
   try {
-    if (!fs.existsSync(p)) return fallback;
-    return JSON.parse(fs.readFileSync(p, 'utf-8'));
+    const raw = await fs.readFile(path.join(DATA_DIR, file), 'utf-8');
+    return JSON.parse(raw);
   } catch { return fallback; }
 }
 
-export function writeJSON(file: string, data: any) {
-  const p = path.join(DATA_DIR, file);
-  fs.writeFileSync(p, JSON.stringify(data, null, 2));
+export async function writeJson(file: string, data: any) {
+  await ensureDir();
+  await fs.writeFile(path.join(DATA_DIR, file), JSON.stringify(data, null, 2), 'utf-8');
 }
+
+export type Order = {
+  id: string;
+  createdAt: string;
+  status: 'new' | 'confirmed' | 'preparing' | 'delivering' | 'done' | 'cancelled';
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'cod';
+  paymentMethod: 'blik' | 'card' | 'transfer' | 'cash' | 'card_courier';
+  blikCode?: string;
+  items: { id: string; name: string; price: number; qty: number }[];
+  subtotal: number;
+  delivery: number;
+  total: number;
+  customer: {
+    name: string; phone: string; email?: string;
+    street: string; building: string; apt?: string;
+    postal: string; city: string; notes?: string;
+  };
+};
+
+export type Reservation = {
+  id: string;
+  createdAt: string;
+  status: 'new' | 'confirmed' | 'cancelled';
+  name: string; phone: string; email?: string;
+  date: string; time: string; people: number;
+  message?: string;
+};
+export type Reservation = {
+  id: string;
+  createdAt: string;
+  status: 'new' | 'confirmed' | 'cancelled' | 'done';
+  date: string;     // YYYY-MM-DD
+  time: string;     // HH:MM
+  people: number;
+  notes: string;
+  customer: {
+    name: string;
+    phone: string;
+    email?: string;
+  };
+};
