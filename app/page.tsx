@@ -20,7 +20,7 @@ export default function AliyaRestaurant() {
   const [form, setForm] = useState({
     name: '', phone: '', email: '',
     street: '', building: '', apt: '',
-    postal: '', city: 'Turek',
+    postal: '', city: 'Warszawa',
     notes: '',
     payment: 'blik' as 'blik' | 'card' | 'transfer' | 'cash' | 'card_courier',
     blikCode: '',
@@ -104,7 +104,7 @@ export default function AliyaRestaurant() {
 
       // Symulacja:
       await new Promise(r => setTimeout(r, 1400));
-      const id = 'ALIYA-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+      const id = 'PEACHES-' + Math.random().toString(36).slice(2, 8).toUpperCase();
       setOrderSent(id);
       setCart([]);
       setCheckout(false);
@@ -154,7 +154,7 @@ export default function AliyaRestaurant() {
     { id: 'm2', cat: 'mains', name: 'Sri-lankan nice rice 2.0', desc: 'Ryż biriani, mix warzyw, chrupiący kurczak i wieprzowina w sosie słodko-kwaśno-ostrym, sezam, dymka, prażona cebula, jajko sadzone, raita, papadam, kolendra', price: 55, img: 'https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=800&q=80' },
     { id: 'm3', cat: 'mains', name: 'Cotoletta milanese', desc: 'Soczysty i chrupiący filet z kurczaka, sos napolitana, grana padano, rukola, orzechy, sos do wyboru', price: 42, img: 'https://images.unsplash.com/photo-1599921841143-819065280020?w=800&q=80' },
     { id: 'm4', cat: 'mains', name: "Gentleman's cut (250g)", desc: 'Grillowana polędwiczka wieprzowa, sos pieczarkowy, puree, grillowane warzywa', price: 55, img: 'https://images.unsplash.com/photo-1558030006-450675393462?w=800&q=80', tag: 'Premium' },
-    { id: 'm5', cat: 'mains', name: 'Aliya na słodko/ostro (300g)', desc: 'Karkówka, sos bbq lub sos ostry, puree, grillowane warzywa', price: 52, img: 'https://images.unsplash.com/photo-1558030006-450675393462?w=800&q=80', tag: 'Signature' },
+    { id: 'm5', cat: 'mains', name: 'Peaches na słodko/ostro (300g)', desc: 'Karkówka, sos bbq lub sos ostry, puree, grillowane warzywa', price: 52, img: 'https://images.unsplash.com/photo-1558030006-450675393462?w=800&q=80', tag: 'Signature' },
     { id: 'm6', cat: 'mains', name: 'Żeberka wieprzowe (700g)', desc: 'Na słodko/ostro - sos bbq lub sos ostry, mix sałat, lambweston frytki', price: 67, img: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80', tag: 'BBQ' },
     { id: 'm7', cat: 'mains', name: 'Lahmacun mała', desc: 'Pizza arabska, mielone mięso wołowe, ser, pietruszka, cytryna', price: 39, img: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=800&q=80' },
     { id: 'm8', cat: 'mains', name: 'Lahmacun duża', desc: 'Pizza arabska, mielone mięso wołowe, ser, pietruszka, cytryna', price: 47, img: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=800&q=80' },
@@ -212,7 +212,7 @@ export default function AliyaRestaurant() {
     { id: 'n9', cat: 'drinks', name: 'Red Bull 250ml', price: 18, img: 'https://images.unsplash.com/photo-1613502743365-c8c1a7b4c8e9?w=800&q=80' },
 
     // KOKTAJLE
-    { id: 'c1', cat: 'cocktails', name: 'Aliya Spritzzzz', desc: 'Wódka, białe wino, brzoskwinia, tonic różowy', price: 30, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&q=80', tag: 'Signature' },
+    { id: 'c1', cat: 'cocktails', name: 'Peaches Spritzzzz', desc: 'Wódka, białe wino, brzoskwinia, tonic różowy', price: 30, img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&q=80', tag: 'Signature' },
     { id: 'c2', cat: 'cocktails', name: 'Pornstar martini', desc: 'Wódka, marakuja, wanilia, limonka, prosecco', price: 30, img: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=800&q=80' },
     { id: 'c3', cat: 'cocktails', name: 'Aperol spritz', desc: 'Prosecco, aperol, woda gazowana, pomarańcza', price: 32, img: 'https://images.unsplash.com/photo-1560963806-394fbe6f24a4?w=800&q=80' },
     { id: 'c4', cat: 'cocktails', name: 'Moje mojito', desc: 'Rum, sprite, mięta, limonka, cukier brązowy, woda gazowana', price: 32, img: 'https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=800&q=80' },
@@ -227,7 +227,7 @@ export default function AliyaRestaurant() {
   const reviews = [
     { name: 'Anna K.', text: 'Najlepsze miejsce w Turku. Atmosfera jak z najlepszych restauracji w Warszawie. Każdy detal dopracowany do perfekcji.', rating: 5, role: 'Krytyk kulinarny' },
     { name: 'Michał W.', text: 'Tatar z truflą to czyste dzieło sztuki. Obsługa profesjonalna, wnętrze zachwyca, smaki niezapomniane.', rating: 5, role: 'Stały gość' },
-    { name: 'Karolina P.', text: 'Romantyczna kolacja w Aliya to gwarancja niezapomnianego wieczoru. Cinematic experience na talerzu.', rating: 5, role: 'Food blogger' },
+    { name: 'Karolina P.', text: 'Romantyczna kolacja w Peaches to gwarancja niezapomnianego wieczoru. Cinematic experience na talerzu.', rating: 5, role: 'Food blogger' },
     { name: 'Tomasz B.', text: 'Premium poziom. Wino, jedzenie, muzyka, światło - wszystko gra w idealnej harmonii. Polecam każdemu.', rating: 5, role: 'Sommelier' },
   ];
 
@@ -285,12 +285,12 @@ export default function AliyaRestaurant() {
           <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-2">
             <div className="relative">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center font-bold text-black text-lg">
-                <img src="/aliya-logo1.png" alt="Aliya" className="w-full h-full object-cover" />
+                <img src="/peaches-logo.png" alt="Peaches" className="w-full h-full object-cover" />
               </div>
               <div className="absolute inset-0 rounded-full border border-amber-400 animate-ping opacity-30"></div>
             </div>
             <div>
-              <div className="font-serif-lux text-2xl tracking-wider gradient-gold font-semibold">ALIYA</div>
+              <div className="font-serif-lux text-2xl tracking-wider gradient-gold font-semibold">PEACHES</div>
               <div className="text-xs text-zinc-500 -mt-1 tracking-widest">PREMIUM LOUNGE</div>
             </div>
           </motion.div>
@@ -315,7 +315,7 @@ export default function AliyaRestaurant() {
             whileTap={{ scale: 0.95 }}
             className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-black font-semibold text-sm tracking-wide glow-gold"
           >
-            <Phone className="w-4 h-4" /> 799 096 723
+            <Phone className="w-4 h-4" /> 22 230 21 90
           </motion.a>
 
           <button className="md:hidden text-amber-400" onClick={() => setMenuOpen(!menuOpen)}>
@@ -337,7 +337,7 @@ export default function AliyaRestaurant() {
                   </a>
                 ))}
                 <a href="tel:799096723" className="px-5 py-3 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-black font-semibold text-center">
-                  799 096 723
+                  22 230 21 90
                 </a>
               </div>
             </motion.div>
@@ -390,17 +390,17 @@ export default function AliyaRestaurant() {
         <div className="relative h-full flex flex-col justify-center max-w-7xl mx-auto px-6 z-10">
           <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5, duration: 1 }} className="flex items-center gap-3 mb-6">
             <div className="h-px w-12 bg-amber-400"></div>
-            <span className="text-amber-400 text-xs tracking-[0.3em] font-light">DOSTAWA · TUREK · MICKIEWICZA 3</span>
+            <span className="text-amber-400 text-xs tracking-[0.3em] font-light">DOSTAWA · WARSZAWA · STALOWA 36</span>
           </motion.div>
 
           <h1 className="font-serif-lux text-7xl md:text-9xl font-light leading-none tracking-tight">
             <motion.span initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 1.2 }} className="block text-glow">Smak.</motion.span>
             <motion.span initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 1.2 }} className="block gradient-gold italic">Sztuki.</motion.span>
-            <motion.span initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, duration: 1.2 }} className="block">Aliya.</motion.span>
+            <motion.span initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, duration: 1.2 }} className="block">Peaches.</motion.span>
           </h1>
 
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 1 }} className="mt-8 max-w-xl text-zinc-400 text-lg font-light leading-relaxed">
-            Premium kuchnia z dostawą do Twojego domu w Turku i okolicach.
+            Premium kuchnia z dostawą do Twojego domu w Warszawie.
             BLIK, karta, szybki przelew - wybierz wygodną formę płatności.
           </motion.p>
 
@@ -443,11 +443,11 @@ export default function AliyaRestaurant() {
             <div key={i} className="flex items-center gap-12 px-6 font-serif-lux text-3xl text-zinc-700">
               <span>DELIVERY</span>
               <Sparkles className="text-amber-400 w-5 h-5" />
-              <span className="italic gradient-gold">Aliya Lounge</span>
+              <span className="italic gradient-gold">Peaches Lounge</span>
               <Sparkles className="text-amber-400 w-5 h-5" />
               <span>BLIK · KARTA · PRZELEW</span>
               <Sparkles className="text-amber-400 w-5 h-5" />
-              <span className="italic">Turek Mickiewicza 3</span>
+              <span className="italic">Warszawa Stalowa 36</span>
               <Sparkles className="text-amber-400 w-5 h-5" />
               <span>FREE OVER {FREE_DELIVERY_FROM} PLN</span>
               <Sparkles className="text-amber-400 w-5 h-5" />
@@ -460,7 +460,7 @@ export default function AliyaRestaurant() {
       <section className="py-12 px-6 bg-gradient-to-b from-zinc-950 to-black">
         <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
           {[
-            { icon: Truck, title: 'Szybka dostawa', desc: '30-60 min, Turek i okolice' },
+            { icon: Truck, title: 'Szybka dostawa', desc: '30-60 min, Warszawa i okolice' },
             { icon: CreditCard, title: 'Bezpieczna płatność', desc: 'BLIK · Karta · Przelew · Gotówka' },
             { icon: Award, title: 'Premium jakość', desc: 'Świeże składniki, autorskie przepisy' },
           ].map((b, i) => {
@@ -693,11 +693,11 @@ export default function AliyaRestaurant() {
               <h3 className="font-serif-lux text-3xl mb-6">Znajdź nas</h3>
               <div className="space-y-5">
                 {[
-                  { icon: MapPin, label: 'Adres', value: 'Mickiewicza 3, 62-700 Turek' },
-                  { icon: Phone, label: 'Telefon', value: '799 096 723', href: 'tel:799096723' },
-                  { icon: Mail, label: 'Email', value: 'kontakt@aliya-turek.pl' },
-                  { icon: Clock, label: 'Dostawa', value: 'Pon-Czw: 12:00 - 21:30\nPt-Sob: 12:00 - 23:00\nNiedziela: 13:00 - 21:30' },
-                  { icon: Truck, label: 'Strefa dostawy', value: 'Turek + okolice (do 10 km)' },
+                  { icon: MapPin, label: 'Adres', value: 'Stalowa 36, 00-812 Warszawa' },
+                  { icon: Phone, label: 'Telefon', value: '22 230 21 90', href: 'tel:222302190' },
+                  { icon: Mail, label: 'Email', value: 'peaches.gastrogirls@gmail.com' },
+                  { icon: Clock, label: 'Dostawa', value: 'Wt-Czw: 13:00 - 22:00\nNiedziela 13:00 21:00\nPoniedziałek: Zamknięte' },
+                  { icon: Truck, label: 'Strefa dostawy', value: 'Warszawa ' },
                 ].map((info, i) => {
                   const Icon = info.icon;
                   const Tag: any = info.href ? 'a' : 'div';
@@ -720,21 +720,21 @@ export default function AliyaRestaurant() {
               <div className="glass rounded-3xl p-2 overflow-hidden">
                 <div className="relative aspect-video rounded-2xl overflow-hidden bg-zinc-900">
                   <iframe
-                    src="https://www.openstreetmap.org/export/embed.html?bbox=18.5%2C52.0%2C18.55%2C52.03&layer=mapnik&marker=52.0167%2C18.5"
+                    src="https://www.openstreetmap.org/export/embed.html?bbox=21.04037940502167%2C52.25987069849973%2C21.045400500297546%2C52.26208697770061"
                     className="w-full h-full opacity-80 grayscale"
                     style={{ filter: 'invert(0.92) hue-rotate(180deg)' }}
                     title="Mapa"
                   ></iframe>
                   <div className="absolute top-4 left-4 glass-gold rounded-full px-4 py-2 flex items-center gap-2 pointer-events-none">
                     <MapPin className="w-4 h-4 text-amber-400" />
-                    <span className="text-sm">Mickiewicza 3, Turek</span>
+                    <span className="text-sm">Stalowa 36, Warszawa</span>
                   </div>
                 </div>
               </div>
 
-              <motion.a href="tel:799096723" whileHover={{ scale: 1.02 }} className="block glass-gold rounded-3xl p-6 text-center group">
+              <motion.a href="tel:222302190" whileHover={{ scale: 1.02 }} className="block glass-gold rounded-3xl p-6 text-center group">
                 <div className="text-xs text-amber-400 tracking-widest mb-2">ZADZWOŃ TERAZ</div>
-                <div className="font-serif-lux text-4xl gradient-gold font-semibold">799 096 723</div>
+                <div className="font-serif-lux text-4xl gradient-gold font-semibold">22 230 21 90</div>
               </motion.a>
 
               <motion.a href="#menu" whileHover={{ scale: 1.02 }} className="block bg-gradient-to-r from-amber-400 to-orange-500 rounded-3xl p-6 text-center text-black">
@@ -755,10 +755,10 @@ export default function AliyaRestaurant() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center font-bold text-black">
-                  <img src="/aliya-logo1.png" alt="Aliya" className="w-full h-full object-cover" />
+                  <img src="/peaches-logo.png" alt="Peaches" className="w-full h-full object-cover" />
                 </div>
                 <div>
-                  <div className="font-serif-lux text-2xl gradient-gold font-semibold">ALIYA</div>
+                  <div className="font-serif-lux text-2xl gradient-gold font-semibold">PEACHES</div>
                   <div className="text-xs text-zinc-500 tracking-widest">PREMIUM LOUNGE</div>
                 </div>
               </div>
@@ -775,9 +775,9 @@ export default function AliyaRestaurant() {
             <div>
               <h4 className="text-amber-400 text-xs tracking-widest mb-4">KONTAKT</h4>
               <ul className="space-y-2 text-sm text-zinc-400">
-                <li>Mickiewicza 3</li>
-                <li>62-700 Turek</li>
-                <li><a href="tel:799096723" className="hover:text-amber-400">799 096 723</a></li>
+                <li>Stalowa 36</li>
+                <li>00-812 Warszawa</li>
+                <li><a href="tel:222302190" className="hover:text-amber-400">22 230 21 90</a></li>
               </ul>
             </div>
             <div>
@@ -786,7 +786,7 @@ export default function AliyaRestaurant() {
             </div>
           </div>
           <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-zinc-600 text-xs tracking-wider">© 2026 ALIYA PREMIUM LOUNGE.</div>
+            <div className="text-zinc-600 text-xs tracking-wider">© 2026 PEACHES PREMIUM LOUNGE.</div>
             <div className="flex gap-6 text-xs text-zinc-600">
               <a href="#" className="hover:text-amber-400">POLITYKA PRYWATNOŚCI</a>
               <a href="#" className="hover:text-amber-400">REGULAMIN</a>
@@ -1183,7 +1183,7 @@ function ReservationWidget() {
                 <div>
                   <div className="text-xs tracking-[0.3em] mb-2" style={{ color: '#fbbf24' }}>REZERWACJA STOLIKA</div>
                   <h3 className="font-serif-lux text-3xl md:text-4xl">Zarezerwuj wizytę</h3>
-                  <p className="text-zinc-400 text-sm mt-2">Mickiewicza 3, Turek · 12:00–22:00</p>
+                  <p className="text-zinc-400 text-sm mt-2">Stalowa 36, Warszawa · 13:00–22:00</p>
                 </div>
                 <button onClick={() => !processing && setOpen(false)} className="w-10 h-10 rounded-full glass flex items-center justify-center shrink-0">
                   <X className="w-5 h-5 text-amber-400" />

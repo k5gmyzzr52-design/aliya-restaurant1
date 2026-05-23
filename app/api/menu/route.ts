@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readJson, writeJson } from '@/lib/db';
+import { readJson, writeJson } from '@/lib/json-db';
 
 async function isAuthorized(req: NextRequest): Promise<boolean> {
   const token = req.headers.get('x-device-token');
