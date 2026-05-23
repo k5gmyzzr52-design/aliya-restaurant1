@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { readJson, writeJson } from '@/lib/json-db';
 import crypto from 'crypto';

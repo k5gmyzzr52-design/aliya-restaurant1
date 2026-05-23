@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
+type OrderWithItems = Prisma.OrderGetPayload<{ include: { items: true } }>;
 import { readJson } from '@/lib/json-db';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
+export const dynamic = 'force-dynamic';
 
 const MIN_ORDER = 60;
 const DELIVERY_FEE = 12;
@@ -96,8 +99,8 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: 'desc' },
   });
 
-  return NextResponse.json(
-    orders.map(o => ({
+ return NextResponse.json(
+    orders.map((o: OrderWithItems) => ({
       id: o.id,
       status: o.status,
       createdAt: o.createdAt,
